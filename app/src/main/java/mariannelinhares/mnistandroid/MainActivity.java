@@ -50,6 +50,7 @@ public class MainActivity  extends Activity implements ActivityCompat.OnRequestP
 
     private TextView resText;
     private Classifier classifier;
+    private Button button;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +62,14 @@ public class MainActivity  extends Activity implements ActivityCompat.OnRequestP
         resText = (TextView) findViewById(R.id.tfRes);
         loadModel();
 
-        classifyLoop();
+        button = (Button) findViewById(R.id.takePic);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                takePicture();
+            }
+        });
+        //classifyLoop();
     }
     @Override
     protected void onResume() {
@@ -90,6 +98,22 @@ public class MainActivity  extends Activity implements ActivityCompat.OnRequestP
                 }
             }
         }).start();
+    }
+
+    public void takePicture() {
+        mCamera.takePicture(null, null, new Camera.PictureCallback() {
+            public void onPictureTaken(byte[] data, Camera camera) {
+                camera.startPreview();
+                if (data != null && data.length > 0) {
+                    Bitmap bitmapFromCamera = BitmapFactory.decodeByteArray(data, 0, data.length);
+                    Bitmap bitmapScaled = Bitmap.createScaledBitmap(bitmapFromCamera, INPUT_SIZE, INPUT_SIZE, true);
+                    Matrix matrix = new Matrix();
+                    matrix.postRotate(90);
+                    Bitmap bitmap = Bitmap.createBitmap(bitmapScaled , 0, 0, bitmapScaled .getWidth(), bitmapScaled .getHeight(), matrix, true);
+                    classify(bitmap);
+                }
+            }
+        });
     }
 
     private void classifyLoop() {
