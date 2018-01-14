@@ -33,9 +33,6 @@ import org.tensorflow.contrib.android.TensorFlowInferenceInterface;
 //lets create this classifer
 public class TensorFlowClassifier implements Classifier {
 
-    // Only returns if at least this confidence
-    //must be a classification percetnage greater than this
-    private static final float THRESHOLD = 0.1f;
     private static int MAX_RESULTS = 100;
     private TensorFlowInferenceInterface inferenceInterface;
 
@@ -43,7 +40,6 @@ public class TensorFlowClassifier implements Classifier {
     private int inputSize;
 
     private List<String> labels;
-//    private float[] output;
     private String[] outputNames;
     private float[] outputLocations;
     private float[] outputScores;
@@ -77,12 +73,8 @@ public class TensorFlowClassifier implements Classifier {
             final String modelFilename,
             final String labelFilename,
             final int inputSize) throws IOException {
-        //intialize a classifier
         TensorFlowClassifier c = new TensorFlowClassifier();
-
-        //read labels for label file
         c.labels = readLabels(assetManager, labelFilename);
-
         c.inferenceInterface = new TensorFlowInferenceInterface(assetManager, modelFilename);
 
         final Graph g = c.inferenceInterface.graph();
@@ -99,18 +91,6 @@ public class TensorFlowClassifier implements Classifier {
         c.inputSize = inputSize;
         // The outputScoresName node has a shape of [N, NumLocations], where N
         // is the batch size.
-        final Operation outputOp1 = g.operation("detection_scores");
-        if (outputOp1 == null) {
-            throw new RuntimeException("Failed to find output Node 'detection_scores'");
-        }
-        final Operation outputOp2 = g.operation("detection_boxes");
-        if (outputOp2 == null) {
-            throw new RuntimeException("Failed to find output Node 'detection_boxes'");
-        }
-        final Operation outputOp3 = g.operation("detection_classes");
-        if (outputOp3 == null) {
-            throw new RuntimeException("Failed to find output Node 'detection_classes'");
-        }
 
         c.outputNames = new String[] {"detection_boxes", "detection_scores",
                 "detection_classes", "num_detections"};
@@ -136,7 +116,6 @@ public class TensorFlowClassifier implements Classifier {
         }
 
         inferenceInterface.feed(inputName, byteValues, 1, inputSize, inputSize, 3);
-
         inferenceInterface.run(outputNames);
 
         //get the output
@@ -169,7 +148,7 @@ public class TensorFlowClassifier implements Classifier {
                             outputLocations[4 * i] * inputSize * 1.3333333f,
                             outputLocations[4 * i + 3] * inputSize,
                             outputLocations[4 * i + 2] * inputSize * 1.3333333f);
-            pq.add(new Classification(i, outputScores[i], labels.get((int) outputClasses[i]), detection));
+            pq.add(new Classification(outputScores[i], labels.get((int) outputClasses[i]), detection));
         }
 
         final ArrayList<Classification> recognitions = new ArrayList<Classification>();

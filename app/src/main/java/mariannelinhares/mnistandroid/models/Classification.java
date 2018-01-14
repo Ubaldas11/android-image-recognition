@@ -8,28 +8,14 @@ import android.graphics.RectF;
 
 public class Classification {
 
-    //conf is the output
-    private int id;
     private float conf;
-    //input label
     private String label;
     private RectF location;
 
-    Classification(int id ) {
-        this.conf = -1.0F;
-        this.label = null;
-        this.id = id;
-    }
-    Classification(int id, float conf, String label, RectF location) {
+    Classification(float conf, String label, RectF location) {
         this.conf = conf;
         this.label = label;
-        this.id = id;
         this.location = location;
-    }
-
-    void update(float conf, String label) {
-        this.conf = conf;
-        this.label = label;
     }
 
     public String getLabel() {
