@@ -48,7 +48,7 @@ public class DetectedObjectActivity extends AppCompatActivity {
 
             Bitmap bitmapScaled = Bitmap.createScaledBitmap(imageBitmap, 300, 300, true);
             Matrix matrix = new Matrix();
-            //matrix.postRotate(90);
+            matrix.postRotate(90);
             Bitmap bitmap = Bitmap.createBitmap(bitmapScaled , 0, 0, bitmapScaled.getWidth(), bitmapScaled.getHeight(), matrix, true);
 
             DetectedHelper detectedHelper = classify(bitmap);
