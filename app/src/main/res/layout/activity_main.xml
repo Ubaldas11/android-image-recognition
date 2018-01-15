@@ -9,23 +9,32 @@
     <FrameLayout
         android:id="@+id/camera_preview"
         android:layout_width="fill_parent"
-        android:layout_height="480dp"
-        android:background="#000"
+        android:layout_height="240dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
         android:layout_weight="1"
-        />
+        android:background="#000">
+
+        <Button
+            android:id="@+id/button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="100dp"
+            android:text="clear" />
+    </FrameLayout>
     <FrameLayout
         android:id="@+id/overlay_preview"
         android:layout_width="fill_parent"
-        android:layout_marginTop="100dp"
-        android:layout_height="480dp">
+        android:layout_marginTop="200dp"
+        android:layout_height="240dp"
+        android:visibility="invisible">
 
-        <Button
-            android:id="@+id/takePic"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Click Me" />
     </FrameLayout>
-
+    <Button
+        android:id="@+id/takePic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="capture" />
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

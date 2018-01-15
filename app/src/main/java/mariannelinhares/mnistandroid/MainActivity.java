@@ -2,6 +2,7 @@ package mariannelinhares.mnistandroid;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -21,6 +22,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -50,7 +52,13 @@ public class MainActivity  extends Activity implements ActivityCompat.OnRequestP
 
     private TextView resText;
     private Classifier classifier;
-    private Button button;
+
+    public Button button;
+    public Button buttonClear;
+
+    private void clearVisibility() {
+        System.out.println("y");
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +69,14 @@ public class MainActivity  extends Activity implements ActivityCompat.OnRequestP
 
         resText = (TextView) findViewById(R.id.tfRes);
         loadModel();
+
+        buttonClear = (Button) findViewById(R.id.button);
+        buttonClear.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                clearVisibility();
+            }
+        });
 
         button = (Button) findViewById(R.id.takePic);
         button.setOnClickListener(new View.OnClickListener() {
@@ -172,12 +188,10 @@ public class MainActivity  extends Activity implements ActivityCompat.OnRequestP
         Bitmap bitmap2;
         ImageView myImage;
 
-        if(findViewById(R.id.overlay_preview).findViewWithTag("ImageView") != null)
-        {
+        if(findViewById(R.id.overlay_preview).findViewWithTag("ImageView") != null)  {
             myImage = (ImageView) findViewById(R.id.overlay_preview).findViewWithTag("ImageView");
             bitmap2 = ((BitmapDrawable) myImage.getDrawable()).getBitmap();
-
-        }else{
+        } else {
             bitmap2 = bitmap.copy(Bitmap.Config.ARGB_8888, true);
             myImage = new ImageView(this);
         }
@@ -194,14 +208,19 @@ public class MainActivity  extends Activity implements ActivityCompat.OnRequestP
         paint.setColor(Color.RED);
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeWidth(10);
-        for (RectF rec:rects) {
+        for(RectF rec:rects) {
             canvas.drawRect(rec.left*n1,rec.top*n2,rec.right*n1+150,rec.bottom*n2,paint);
         }
         canvas.drawBitmap(cbit, new Matrix(), null);
         myImage.setImageBitmap(cbit);
-        FrameLayout fr = (FrameLayout) findViewById(R.id.overlay_preview);
-        fr.addView(myImage);
 
+        ByteArrayOutputStream bStream = new ByteArrayOutputStream();
+        cbit.compress(Bitmap.CompressFormat.PNG, 100, bStream);
+        byte[] byteArray = bStream.toByteArray();
+
+        Intent anotherIntent = new Intent(this, DetectedObjectActivity.class);
+        anotherIntent.putExtra("image", byteArray);
+        startActivity(anotherIntent);
     }
 
     @Override
