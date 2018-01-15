@@ -6,50 +6,12 @@
         android:layout_height="match_parent"
         tools:context="mariannelinhares.mnistandroid.MainActivity">
 
-    <FrameLayout
-        android:id="@+id/camera_preview"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_weight="1"
-        android:background="#000">
-
-        <Button
-            android:id="@+id/button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="100dp"
-            android:text="clear" />
-    </FrameLayout>
-    <FrameLayout
-        android:id="@+id/overlay_preview"
-        android:layout_width="fill_parent"
-        android:layout_marginTop="200dp"
-        android:layout_height="240dp"
-        android:visibility="invisible">
-
-    </FrameLayout>
     <Button
-        android:id="@+id/takePic"
+        android:id="@+id/button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="capture" />
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:layout_alignParentBottom="true"
-        android:background="@color/colorWhite"
-        android:padding="@dimen/activity_vertical_margin">
-        <TextView
-            android:id="@+id/tfRes"
-            android:layout_alignParentBottom="true"
-            android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:paddingLeft="10dp"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-
-    </LinearLayout>
-
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="205dp"
+        android:text="Start Again" />
 </RelativeLayout>
