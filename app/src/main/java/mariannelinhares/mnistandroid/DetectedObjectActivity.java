@@ -25,6 +25,7 @@ import mariannelinhares.mnistandroid.utils.DetectedHelper;
 
 public class DetectedObjectActivity extends AppCompatActivity {
     private static final int INPUT_SIZE = 300;
+    private static final int HEIGHT_ADJUSTMENT = 40;
 
     private static final String MODEL_FILE = "ssd_mobilenet_v1_android_export.pb";
     private static final String LABEL_FILE = "coco_labels_list.txt";
@@ -97,8 +98,9 @@ public class DetectedObjectActivity extends AppCompatActivity {
     }
 
     private Bitmap produceOverlay(Bitmap bitmap, List<RectF> rects) {
-        int w = 700;
-        int h = 900;
+        int w = bitmap.getWidth();
+        int h = bitmap.getHeight();
+
         float n1 = w/300;
         float n2 = h/300;
         Bitmap cbit = Bitmap.createScaledBitmap(bitmap, w, h, true);
@@ -107,9 +109,9 @@ public class DetectedObjectActivity extends AppCompatActivity {
         Paint paint = new Paint();
         paint.setColor(Color.GREEN);
         paint.setStyle(Paint.Style.STROKE);
-        paint.setStrokeWidth(10);
+        paint.setStrokeWidth(5);
         for(RectF rec:rects) {
-            canvas.drawRect(rec.left*n1,rec.top*n2,rec.right*n1+150,rec.bottom*n2,paint);
+            canvas.drawRect(rec.left*n1,rec.top*n2 - HEIGHT_ADJUSTMENT,rec.right*n1,rec.bottom*n2 - HEIGHT_ADJUSTMENT,paint);
         }
         canvas.drawBitmap(cbit, new Matrix(), null);
         return cbit;
