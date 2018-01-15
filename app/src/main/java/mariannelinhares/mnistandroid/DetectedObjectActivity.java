@@ -18,10 +18,13 @@ import org.w3c.dom.Text;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+
 import mariannelinhares.mnistandroid.models.Classification;
 import mariannelinhares.mnistandroid.models.Classifier;
 import mariannelinhares.mnistandroid.models.TensorFlowClassifier;
 import mariannelinhares.mnistandroid.utils.DetectedHelper;
+import mariannelinhares.mnistandroid.utils.Tuple;
 
 public class DetectedObjectActivity extends AppCompatActivity {
     private static final int INPUT_SIZE = 300;
@@ -93,11 +96,11 @@ public class DetectedObjectActivity extends AppCompatActivity {
                 rects.add(res.get(i).getLocation());
             }
         }
-        Bitmap producedBitmap = produceOverlay(bit, rects);
-        return new DetectedHelper(text, producedBitmap);
+        Tuple bitmapAndColors = produceOverlay(bit, rects);
+        return new DetectedHelper(text, (Bitmap)bitmapAndColors.x);
     }
 
-    private Bitmap produceOverlay(Bitmap bitmap, List<RectF> rects) {
+    private Tuple<Bitmap, List<Integer>> produceOverlay(Bitmap bitmap, List<RectF> rects) {
         int w = bitmap.getWidth();
         int h = bitmap.getHeight();
 
@@ -107,13 +110,18 @@ public class DetectedObjectActivity extends AppCompatActivity {
         Canvas canvas = new Canvas(cbit);
         canvas.drawColor(Color.TRANSPARENT);
         Paint paint = new Paint();
-        paint.setColor(Color.GREEN);
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeWidth(5);
+        List<Integer> colorList = new ArrayList<>();
         for(RectF rec:rects) {
+            Random rnd = new Random();
+            int color = Color.argb(255, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256));
+            paint.setColor(color);
+            colorList.add(color);
             canvas.drawRect(rec.left*n1,rec.top*n2 - HEIGHT_ADJUSTMENT,rec.right*n1,rec.bottom*n2 - HEIGHT_ADJUSTMENT,paint);
         }
         canvas.drawBitmap(cbit, new Matrix(), null);
-        return cbit;
+        Tuple result = new Tuple(cbit, colorList);
+        return result;
     }
 }
