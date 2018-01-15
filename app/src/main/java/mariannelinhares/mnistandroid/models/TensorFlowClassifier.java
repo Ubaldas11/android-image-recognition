@@ -25,9 +25,10 @@ import org.tensorflow.Operation;
 import org.tensorflow.contrib.android.TensorFlowInferenceInterface;
 
 /**
- * Changed from https://github.com/MindorksOpenSource/AndroidTensorFlowMNISTExample/blob/master
- * /app/src/main/java/com/mindorks/tensorflowexample/TensorFlowImageClassifier.java
- * Created by marianne-linhares on 20/04/17.
+ * Combination of https://github.com/MindorksOpenSource/AndroidTensorFlowMNISTExample/blob/master
+ * and
+ * https://github.com/tensorflow/tensorflow/blob/master/tensorflow/examples/android/src/org/tensorflow/demo/TensorFlowObjectDetectionAPIModel.java
+ * to suit the SSD neural net.
  */
 
 //lets create this classifer

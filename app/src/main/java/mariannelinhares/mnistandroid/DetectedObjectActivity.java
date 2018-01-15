@@ -86,12 +86,15 @@ public class DetectedObjectActivity extends AppCompatActivity {
         Bitmap bit = src.copy(Bitmap.Config.ARGB_8888, true);
 
         final List<Classification> res = classifier.recognize(src);
-        if (res == null) {
-            return new DetectedHelper("EMPTY", bit);
+        boolean anyObjectRecognized = false;
+        for (int i = 0; i < res.size(); i++) {
+            if (res.get(i).getConf() > 0.1f) anyObjectRecognized = true;
+        }
+        if (!anyObjectRecognized) {
+            return new DetectedHelper("No objects recognized.", bit);
         }
         for (int i = 0; i < res.size(); i++) {
             if (res.get(i).getConf() > 0.1f) {
-                // čia šitas listas yra visų atpažintų objektų nuotraukoje
                 text += String.format("%s - %f\n", res.get(i).getLabel(), res.get(i).getConf());
                 rects.add(res.get(i).getLocation());
             }
