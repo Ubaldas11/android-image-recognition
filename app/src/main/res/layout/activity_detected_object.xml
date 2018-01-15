@@ -12,16 +12,24 @@
         tools:layout_editor_absoluteX="8dp"
         tools:layout_editor_absoluteY="8dp">
 
-        <ImageView
-            android:id="@+id/imageView"
-            android:layout_width="match_parent"
-            android:layout_height="407dp"
-            app:srcCompat="@android:drawable/alert_dark_frame" />
-
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
+            <ImageView
+                android:id="@+id/imageView"
+                android:layout_width="match_parent"
+                android:layout_height="407dp"
+                app:srcCompat="@android:drawable/alert_dark_frame" />
 
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:layout_alignParentBottom="true"
+                android:textSize="30sp"
+                android:typeface="serif"
+                android:paddingLeft="10dp"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
         </RelativeLayout>
     </FrameLayout>
 </android.support.constraint.ConstraintLayout>

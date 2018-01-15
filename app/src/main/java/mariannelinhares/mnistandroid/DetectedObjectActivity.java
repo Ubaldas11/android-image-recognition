@@ -13,6 +13,8 @@ import android.os.Bundle;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import org.w3c.dom.Text;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,12 +50,15 @@ public class DetectedObjectActivity extends AppCompatActivity {
 
             Bitmap bitmapScaled = Bitmap.createScaledBitmap(imageBitmap, 300, 300, true);
             Matrix matrix = new Matrix();
-            //matrix.postRotate(90);
+            matrix.postRotate(90);
             Bitmap bitmap = Bitmap.createBitmap(bitmapScaled , 0, 0, bitmapScaled.getWidth(), bitmapScaled.getHeight(), matrix, true);
 
             DetectedHelper detectedHelper = classify(bitmap);
 
             myImage.setImageBitmap(detectedHelper.getData());
+
+            resText = (TextView) findViewById(R.id.textView);
+            resText.setText(detectedHelper.getText());
         } catch (Exception e) {
             e.printStackTrace();
         }
