@@ -13,7 +13,10 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.hardware.Camera;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.view.View;
 import android.widget.Button;
@@ -23,7 +26,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -38,248 +46,47 @@ import mariannelinhares.mnistandroid.models.TensorFlowClassifier;
 
 public class MainActivity  extends Activity implements ActivityCompat.OnRequestPermissionsResultCallback {
 
-    private static final int PERMISSION_REQUEST_CAMERA = 0;
-
-    private static final int CAMERA_ID = 0;
-
-    private CameraPreview mPreview;
-    private Camera mCamera;
-
-    private static final int INPUT_SIZE = 300;
-
-    private static final String MODEL_FILE = "ssd_mobilenet_v1_android_export.pb";
-    private static final String LABEL_FILE = "coco_labels_list.txt";
-
-    private TextView resText;
-    private Classifier classifier;
-
-    public Button button;
-    public Button buttonClear;
-
-    private void clearVisibility() {
-        System.out.println("y");
-    }
+    private String pictureImagePath = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        showCameraPreview();
-
-        resText = (TextView) findViewById(R.id.tfRes);
-        loadModel();
-
-        buttonClear = (Button) findViewById(R.id.button);
-        buttonClear.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                clearVisibility();
-            }
-        });
-
-        button = (Button) findViewById(R.id.takePic);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                takePicture();
-            }
-        });
-        //classifyLoop();
+        startCamera();
     }
+
     @Override
     protected void onResume() {
         super.onResume();
-        mCamera.startPreview();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        mCamera.stopPreview();
-    }
-
-    private void loadModel() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    classifier = TensorFlowClassifier.create(
-                                    getAssets(),
-                                    MODEL_FILE,
-                                    LABEL_FILE,
-                                    INPUT_SIZE);
-                } catch (final Exception e) {
-                    throw new RuntimeException("Error initializing classifiers!", e);
-                }
-            }
-        }).start();
-    }
-
-    public void takePicture() {
-        mCamera.takePicture(null, null, new Camera.PictureCallback() {
-            public void onPictureTaken(byte[] data, Camera camera) {
-                camera.startPreview();
-                if (data != null && data.length > 0) {
-                    Bitmap bitmapFromCamera = BitmapFactory.decodeByteArray(data, 0, data.length);
-                    Bitmap bitmapScaled = Bitmap.createScaledBitmap(bitmapFromCamera, INPUT_SIZE, INPUT_SIZE, true);
-                    Matrix matrix = new Matrix();
-                    matrix.postRotate(90);
-                    Bitmap bitmap = Bitmap.createBitmap(bitmapScaled , 0, 0, bitmapScaled .getWidth(), bitmapScaled .getHeight(), matrix, true);
-                    classify(bitmap);
-                }
-            }
-        });
-    }
-
-    private void classifyLoop() {
-        Timer t = new Timer();
-        t.schedule(new TimerTask() {
-            @Override
-            public void run() {
-            if (mCamera != null) {
-                mCamera.autoFocus(new Camera.AutoFocusCallback() {
-                    @Override
-                    public void onAutoFocus(boolean b, Camera camera) {
-                        if (b){
-                            camera.takePicture(null, null, new Camera.PictureCallback() {
-                                public void onPictureTaken(byte[] data, Camera camera) {
-                                    camera.startPreview();
-                                    if (data != null && data.length > 0) {
-                                        Bitmap bitmapFromCamera = BitmapFactory.decodeByteArray(data, 0, data.length);
-                                        Bitmap bitmapScaled = Bitmap.createScaledBitmap(bitmapFromCamera, INPUT_SIZE, INPUT_SIZE, true);
-                                        Matrix matrix = new Matrix();
-                                        matrix.postRotate(90);
-                                        Bitmap bitmap = Bitmap.createBitmap(bitmapScaled , 0, 0, bitmapScaled .getWidth(), bitmapScaled .getHeight(), matrix, true);
-                                        classify(bitmap);
-                                    }
-                                }
-                            });
-                        }
-                    }
-                });
-
-            }
-
-            }
-        }, 5000, 5000);
-
-    }
-    public void classify(Bitmap src) {
-        String text = "";
-        List<RectF> rects = new ArrayList<RectF>();
-        Bitmap bit = src.copy(Bitmap.Config.ARGB_8888, true);
-
-        final List<Classification> res = classifier.recognize(src);
-        if (res == null)
-            return;
-        for (int i = 0; i < res.size(); i++)
-            if (res.get(i).getConf() > 0.1f){
-                // čia šitas listas yra visų atpažintų objektų nuotraukoje
-                text += String.format("%s - %f\n", res.get(i).getLabel(), res.get(i).getConf());
-                rects.add(res.get(i).getLocation());
-            }
-        resText.setText(text);
-        drawOverlay(bit, rects);
-
-    }
-    private void drawOverlay(Bitmap bitmap, List<RectF> rects)
-    {
-        Bitmap bitmap2;
-        ImageView myImage;
-
-        if(findViewById(R.id.overlay_preview).findViewWithTag("ImageView") != null)  {
-            myImage = (ImageView) findViewById(R.id.overlay_preview).findViewWithTag("ImageView");
-            bitmap2 = ((BitmapDrawable) myImage.getDrawable()).getBitmap();
-        } else {
-            bitmap2 = bitmap.copy(Bitmap.Config.ARGB_8888, true);
-            myImage = new ImageView(this);
-        }
-        FrameLayout frr = (FrameLayout) findViewById(R.id.camera_preview);
-        int w = frr.getWidth();
-        int h = frr.getHeight();
-        float n1 = w/300;
-        float n2 = h/300;
-        System.out.println(w + " " + h);
-        Bitmap cbit = Bitmap.createScaledBitmap(bitmap2, w, h, true);
-        Canvas canvas = new Canvas(cbit);
-        canvas.drawColor(Color.TRANSPARENT);
-        Paint paint = new Paint();
-        paint.setColor(Color.RED);
-        paint.setStyle(Paint.Style.STROKE);
-        paint.setStrokeWidth(10);
-        for(RectF rec:rects) {
-            canvas.drawRect(rec.left*n1,rec.top*n2,rec.right*n1+150,rec.bottom*n2,paint);
-        }
-        canvas.drawBitmap(cbit, new Matrix(), null);
-        myImage.setImageBitmap(cbit);
-
-        ByteArrayOutputStream bStream = new ByteArrayOutputStream();
-        cbit.compress(Bitmap.CompressFormat.PNG, 100, bStream);
-        byte[] byteArray = bStream.toByteArray();
-
-        Intent anotherIntent = new Intent(this, DetectedObjectActivity.class);
-        anotherIntent.putExtra("image", byteArray);
-        startActivity(anotherIntent);
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                                           int[] grantResults) {
-        if (requestCode == PERMISSION_REQUEST_CAMERA) {
-            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                startCamera();
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 1) {
+            File imgFile = new File(pictureImagePath);
+            if (imgFile.exists()) {
+                Intent intent = new Intent(MainActivity.this, DetectedObjectActivity.class);
+                intent.putExtra("BitmapImageFile", imgFile);
+                startActivity(intent);
             }
-        }
-    }
-
-    private void showCameraPreview() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-                == PackageManager.PERMISSION_GRANTED) {
-            startCamera();
-        } else {
-            requestCameraPermission();
-        }
-    }
-
-    private void requestCameraPermission() {
-        if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                Manifest.permission.CAMERA)) {
-            ActivityCompat.requestPermissions(MainActivity.this,
-                    new String[]{Manifest.permission.CAMERA},
-                    PERMISSION_REQUEST_CAMERA);
-
-        } else {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA},
-                    PERMISSION_REQUEST_CAMERA);
         }
     }
 
     private void startCamera() {
-        mCamera = getCameraInstance(CAMERA_ID);
-        Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
-        Camera.getCameraInfo(CAMERA_ID, cameraInfo);
-        if (mCamera == null || cameraInfo == null) {
-            Toast.makeText(this, "Camera is not available.", Toast.LENGTH_SHORT).show();
-        } else {
-            final int displayRotation = getWindowManager().getDefaultDisplay()
-                    .getRotation();
-            mCamera.setDisplayOrientation(CameraPreview.calculatePreviewOrientation(cameraInfo, displayRotation));
-            mPreview = new CameraPreview(this, mCamera, cameraInfo, displayRotation);
-            FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
-            preview.addView(mPreview);
-        }
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = timeStamp + ".jpg";
+        File storageDir = Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES);
+        pictureImagePath = storageDir.getAbsolutePath() + "/" + imageFileName;
+        File file = new File(pictureImagePath);
+        Uri outputFileUri = Uri.fromFile(file);
+        Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, outputFileUri);
+        startActivityForResult(cameraIntent, 1);
     }
-
-    private Camera getCameraInstance(int cameraId) {
-        Camera c = null;
-        try {
-            c = Camera.open(cameraId);
-        } catch (Exception e) {
-            Toast.makeText(this, "Camera " + cameraId + " is not available: " + e.getMessage(),
-                    Toast.LENGTH_SHORT).show();
-        }
-        return c;
-    }
-
 }
