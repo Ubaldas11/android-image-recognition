@@ -19,6 +19,7 @@
                 android:id="@+id/imageView"
                 android:layout_width="match_parent"
                 android:layout_height="407dp"
+                android:paddingTop="10dp"
                 app:srcCompat="@android:drawable/alert_dark_frame" />
 
             <TextView
@@ -26,9 +27,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="80dp"
                 android:layout_alignParentBottom="true"
-                android:textSize="30sp"
+                android:textSize="20sp"
                 android:typeface="serif"
-                android:paddingLeft="10dp"
+                android:paddingLeft="20dp"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
         </RelativeLayout>
     </FrameLayout>
